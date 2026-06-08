@@ -1,0 +1,20 @@
+{
+  "token": "YOUR_DISCORD_BOT_TOKEN",
+  "appId": "YOUR_DISCORD_APPLICATION_ID",
+  "dbConnection": {
+    "host": "localhost",
+    "user": "root",
+    "password": "your_mysql_password",
+    "database": "ghost_database_name",
+    "port": 3306
+  },
+  "redisConnection": "redis://127.0.0.1:6379",
+  "googleDriveApiKey": "YOUR_GOOGLE_DRIVE_API_KEY",
+  "ghost": {
+    "host": "127.0.0.1",
+    "port": 3000,
+    "password": "your_ghost_password"
+  },
+  "yandexCatalogId": "YOUR_YANDEX_CLOUD_FOLDER_ID",
+  "yandesOAuth": "YOUR_YANDEX_OAUTH_TOKEN"
+}

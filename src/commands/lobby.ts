@@ -1,0 +1,25 @@
+import { ChatInputCommandInteraction } from "discord.js";
+import { start } from "../api/commands/lobby/start";
+import { stop } from "../api/commands/lobby/stop";
+import lobbyCommand from "../commandData/lobby";
+import { ownerID, production } from "../utils/globals";
+
+module.exports = {
+  data: lobbyCommand,
+  async execute(interaction: ChatInputCommandInteraction) {
+    if (!production && interaction.member.user.id !== ownerID) return;
+
+    await interaction.deferReply();
+
+    switch (interaction.options.getSubcommand()) {
+      case "start":
+        await start(interaction);
+        return;
+      case "stop":
+        await stop(interaction);
+        return;
+      default:
+        return await interaction.editReply("...");
+    }
+  },
+};
