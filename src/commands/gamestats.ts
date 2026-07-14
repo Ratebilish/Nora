@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits } from "discord.js";
 import { start } from "../api/commands/gamestats/start";
 import { stop } from "../api/commands/gamestats/stop";
+import { test } from "../api/commands/gamestats/test";
 import gamestatsCommand from "../commandData/gamestats";
 import { warning } from "../embeds/response";
 import { ownerID, production } from "../utils/globals";
@@ -26,6 +27,9 @@ module.exports = {
         return;
       case "stop":
         await stop(interaction);
+        return;
+      case "test":
+        await test(interaction);
         return;
       default:
         return await interaction.editReply("...");

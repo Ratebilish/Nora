@@ -62,16 +62,6 @@ const playersTable = (players: lobbyStrings, empty: boolean) => {
     players.option.fieldName.substr(1)
   }`;
 
-  const pingLines = players.pings.split("\n");
-  const optionLines = players.option.string.split("\n");
-  const pingAndStats = pingLines
-    .map((ping, index) => {
-      const stat = optionLines[index] || "";
-      if (!ping && !stat) return "";
-      return `${ping}  ${stat}`.trimEnd();
-    })
-    .join("\n");
-
   return [
     {
       name: "Nickname",
@@ -79,8 +69,13 @@ const playersTable = (players: lobbyStrings, empty: boolean) => {
       inline: true,
     },
     {
-      name: `Ping | ${optionFieldName}`,
-      value: pingAndStats,
+      name: "Ping", // Отдельный столбик для Пинга
+      value: players.pings,
+      inline: true,
+    },
+    {
+      name: optionFieldName, // Отдельный столбик для MMR (или сервера, если не ranked)
+      value: players.option.string,
       inline: true,
     },
   ];

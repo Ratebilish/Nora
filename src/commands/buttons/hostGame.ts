@@ -28,6 +28,14 @@ import {
 import { getCurrentLobbies } from "../../utils/lobbyParser";
 import { log } from "../../utils/log";
 
+function generateShortId(length = 4): string {
+  const chars =
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
+}
+
 module.exports = {
   id: buttonId.hostGame,
   async execute(interaction: ButtonInteraction) {
@@ -60,7 +68,7 @@ module.exports = {
 
     const resumeLobbyKey = await pauseLobbyWatcher(interaction.guildId, 10000);
 
-    const result = await pubGame(production ? "res publica game" : "test");
+    const result = await pubGame(`re-${generateShortId()}`);
 
     switch (result) {
       case "success":

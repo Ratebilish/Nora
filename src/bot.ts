@@ -9,9 +9,10 @@ import {
 } from "discord.js";
 import { reloadBot } from "./api/reload/reload";
 import { token } from "./auth.json";
+import { ensurePlayerMmrTable } from "./db/queries";
 import { changeBotStatus, updateStatusInfo } from "./utils/botStatus";
 import { clearRedisOnStart } from "./utils/clearRedisOnStart";
-import { guildIDs, production } from "./utils/globals";
+import { guildID, production } from "./utils/globals";
 import { ensureDefaultMapConfig } from "./utils/mapConfig";
 import { listenButtons } from "./utils/listenButtons";
 import { listenCommands } from "./utils/listenCommands";
@@ -81,8 +82,11 @@ client.once("ready", async () => {
   }, 1000 * 60 * 60 * 24);
   await updateStatusInfo();
 
-  const mapConfigResult = await ensureDefaultMapConfig(guildIDs.ghostGuild);
+  const mapConfigResult = await ensureDefaultMapConfig(guildID);
   log(`[map config] ensure fbt: ${mapConfigResult}`);
+
+  const mmrTableResult = await ensurePlayerMmrTable();
+  log(`[mmr] ensure player_mmr table: ${mmrTableResult}`);
 
   log("------> BOT IN DEVELOPMENT OR LOGS ENABLED");
 });

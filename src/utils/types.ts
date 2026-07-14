@@ -21,7 +21,7 @@ type lobbyTable = {
   name: string;
   server: string;
   ping: string;
-  winrate: string;
+  mmr: string;
 };
 
 type lobbyGame = {
@@ -136,7 +136,7 @@ const enum botEvent {
 
 const enum optionLobbyField {
   server = "server",
-  winrate = "winrate",
+  mmr = "mmr",
 }
 
 type gamestatsInfo = {
@@ -144,6 +144,20 @@ type gamestatsInfo = {
   channelID: string;
   delay: number;
   prevGamesCount: number | undefined;
+};
+
+type gamePlayerStats = {
+  gameid: number;
+  name: string;
+  team: number;
+  kills: number;
+  deaths: number;
+  damage: number;
+  score: number;
+  heroes: string[];
+  mmrBefore?: number;
+  mmrAfter?: number;
+  mmrDelta?: number;
 };
 
 type gameDataByIdsGamestats = {
@@ -155,7 +169,8 @@ type gameDataByIdsGamestats = {
   winnerTeam: number | null;
   players: Array<{
     teamName: string;
-    teamPlayers: Array<{ gameid: number; name: string; team: number }>;
+    teamScore: number | null;
+    teamPlayers: Array<gamePlayerStats>;
   }>;
 };
 
@@ -357,3 +372,20 @@ type YandexLanguageListResponse = {
     name: string;
   }[];
 };
+
+type mmrChangeEntry = {
+  before: number;
+  after: number;
+  delta: number;
+};
+
+type playerMmr = {
+  nickname: string;
+  mmr: number;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+};
+
+type mmrLeaderboardEntry = playerMmr;
+

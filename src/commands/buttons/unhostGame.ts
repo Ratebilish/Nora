@@ -1,13 +1,9 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonInteraction,
-  Message,
-} from "discord.js";
+import { ButtonInteraction, Message } from "discord.js";
 import { unhostGame } from "../../api/ghost/unhostGame";
 import { pauseLobbyWatcher } from "../../api/lobbyWatcher/pauseLobbyWatcher";
 import { resetLobbyHubState } from "../../api/lobbyWatcher/resetLobbyHubState";
 import { resumeLobbyWatcher } from "../../api/lobbyWatcher/resumeLobbyWatcher";
+import { shuffleWinrateButtonDefault } from "../../components/buttons/shuffleWinrate";
 import { startGameButtonDefault } from "../../components/buttons/startGame";
 import {
   unhostGameButtonError,
@@ -15,16 +11,28 @@ import {
 } from "../../components/buttons/unhostGame";
 import { clearLobbyGame } from "../../db/queries";
 import { buttonId, ghostGuildBotId } from "../../utils/globals";
+import {
+  buildLobbyButtonRow,
+  getBotIdFromLobbyMessage,
+} from "../../utils/lobbyButtons";
 
 module.exports = {
   id: buttonId.unhostGame,
   async execute(interaction: ButtonInteraction) {
+    const message = interaction.message as Message;
+    const botid = getBotIdFromLobbyMessage(message);
+
+    if (botid === null) return;
+
     await interaction.update({
       components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          startGameButtonDefault({ disabled: true }),
-          unhostGameButtonLoading()
-        ),
+        buildLobbyButtonRow({
+          message,
+          botid,
+          start: startGameButtonDefault({ disabled: true }),
+          shuffle: shuffleWinrateButtonDefault({ botid, disabled: true }),
+          unhost: unhostGameButtonLoading(),
+        }),
       ],
     });
 
@@ -40,22 +48,28 @@ module.exports = {
         break;
       case "error":
       case "uknown":
-        await (interaction.message as Message).edit({
+        await message.edit({
           components: [
-            new ActionRowBuilder<ButtonBuilder>().addComponents(
-              startGameButtonDefault({ disabled: true }),
-              unhostGameButtonError({ label: "This game already unhosted" })
-            ),
+            buildLobbyButtonRow({
+              message,
+              botid,
+              start: startGameButtonDefault({ disabled: true }),
+              shuffle: shuffleWinrateButtonDefault({ botid, disabled: true }),
+              unhost: unhostGameButtonError({ label: "This game already unhosted" }),
+            }),
           ],
         });
         break;
       case null:
-        await (interaction.message as Message).edit({
+        await message.edit({
           components: [
-            new ActionRowBuilder<ButtonBuilder>().addComponents(
-              startGameButtonDefault({ disabled: true }),
-              unhostGameButtonError()
-            ),
+            buildLobbyButtonRow({
+              message,
+              botid,
+              start: startGameButtonDefault({ disabled: true }),
+              shuffle: shuffleWinrateButtonDefault({ botid, disabled: true }),
+              unhost: unhostGameButtonError(),
+            }),
           ],
         });
         break;

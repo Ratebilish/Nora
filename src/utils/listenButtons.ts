@@ -1,16 +1,24 @@
 import { client } from "../bot";
-import { guildIDs, production } from "./globals";
+import { guildID } from "./globals";
 import { log } from "./log";
 import { logButtonCommand } from "./logCmd";
 
 export const listenButtons = () =>
   client.on("interactionCreate", async (interaction) => {
-    if (production && interaction.guildId !== guildIDs.ghostGuild) return;
-    if (!production && interaction.guildId !== guildIDs.debugGuild) return;
+    if (interaction.guildId !== guildID) return;
 
     if (!interaction.isButton()) return;
 
-    const command = client.buttons.get(interaction.customId);
+    let command = client.buttons.get(interaction.customId);
+
+    if (!command) {
+      for (const [id, buttonCommand] of client.buttons) {
+        if (interaction.customId.startsWith(`${id}:`)) {
+          command = buttonCommand;
+          break;
+        }
+      }
+    }
 
     if (!command) return;
 

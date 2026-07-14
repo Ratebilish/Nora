@@ -3,7 +3,7 @@ import { lobbyMsgUpdater } from "../api/lobbyWatcher/lobbyMsgUpdater";
 import { getLobbyWatcherSettings } from "../api/lobbyWatcher/settingsApi";
 import { groupsKey, keyDivider, redisKey } from "../redis/kies";
 import { redis } from "../redis/redis";
-import { guildIDs, production } from "./globals";
+import { guildID } from "./globals";
 import { log } from "./log";
 import { gamestatsUpdater } from "./timerFuncs";
 
@@ -17,8 +17,7 @@ export const restartLobbyWatcher = async () => {
         const keys = redisKey.destruct(key);
         const settings = await getLobbyWatcherSettings(keys[0]);
         if (!settings) return;
-        if (production && keys[0] === guildIDs.debugGuild) return;
-        if (!production && keys[0] !== guildIDs.debugGuild) return;
+        if (keys[0] !== guildID) return;
         log("[restart lobby watcher] starting lobby watcher");
         headerMsgUpdater(keys[0], settings.delay);
         const lobbyGameKeys = await redis.scanForPattern(

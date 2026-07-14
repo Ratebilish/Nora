@@ -33,3 +33,18 @@ export const makeQuery = async (query: string) => {
     return null;
   }
 };
+
+/**
+ * Для DDL-запросов (CREATE TABLE и т.п.), где нет смысла интерпретировать
+ * результат как массив строк — makeQuery в этом случае вернул бы null
+ * даже при успешном выполнении.
+ */
+export const execRaw = async (query: string): Promise<boolean> => {
+  try {
+    await pool.query(query);
+    return true;
+  } catch (error) {
+    log("[mysql]", error);
+    return false;
+  }
+};

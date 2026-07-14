@@ -1,7 +1,7 @@
 import { REST, Routes } from "discord.js";
 import fs from "node:fs";
 import { appId, token } from "./auth.json";
-import { guildIDs } from "./utils/globals";
+import { guildID } from "./utils/globals";
 
 // discord.js v14: REST и Routes теперь из основного пакета discord.js
 // API версия v10 используется по умолчанию
@@ -22,12 +22,7 @@ const rest = new REST({ version: "10" }).setToken(token);
 
 rest
   .put(
-    Routes.applicationGuildCommands(
-      appId,
-      process.env.NODE_ENV === "production"
-        ? guildIDs.ghostGuild
-        : guildIDs.debugGuild
-    ),
+    Routes.applicationGuildCommands(appId, guildID),
     {
       body: commands,
     }

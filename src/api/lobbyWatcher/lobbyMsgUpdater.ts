@@ -1,7 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder } from "discord.js";
 import md5 from "md5";
-import { startGameButtonDefault } from "../../components/buttons/startGame";
-import { unhostGameButtonDefault } from "../../components/buttons/unhostGame";
 import { lobbyGame } from "../../embeds/lobby";
 import { groupsKey, redisKey } from "../../redis/kies";
 import { redis } from "../../redis/redis";
@@ -11,11 +8,11 @@ import {
   getMessageById,
   sendResponse,
 } from "../../utils/discordMessage";
-import { buttonId } from "../../utils/globals";
+import { buildLobbyButtonRow } from "../../utils/lobbyButtons";
 import { getCurrentLobby, playersLobbyToString } from "../../utils/lobbyParser";
 import { log } from "../../utils/log";
 import { searchMapConfigByMapName } from "../../utils/mapConfig";
-import { resolveButton } from "../../utils/resolveComponent";
+import { buildWinrateShufflePlan } from "../../utils/winrateShuffle";
 
 // discord.js v14: MessageActionRow → ActionRowBuilder
 // resolveComponent удалён — используем helper
@@ -103,11 +100,8 @@ const updateLobbyMessage = async (
     return;
   }
 
-  const { parsedGame, newLobbyHash, prevLobbyHash } = await getGameParams(
-    guildID,
-    game,
-    lobbySettings
-  );
+  const { parsedGame, newLobbyHash, prevLobbyHash, rankingEnabled, balanced } =
+    await getGameParams(guildID, game, lobbySettings);
 
   const msgEmbeds = [lobbyGame(parsedGame) as any];
 
@@ -115,10 +109,12 @@ const updateLobbyMessage = async (
     log("[lobby msg updater] cant get prev msg, creating new one");
 
     const msgComponents = [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        startGameButtonDefault({ disabled: game.slotsTaken === 0 }),
-        unhostGameButtonDefault()
-      ),
+      buildLobbyButtonRow({
+        botid: game.botid,
+        rankingEnabled,
+        balanced,
+        slotsTaken: game.slotsTaken,
+      }),
     ];
 
     const newMsg = await sendResponse(settings.channelID, {
@@ -156,18 +152,16 @@ const updateLobbyMessage = async (
     lobbyHash: newLobbyHash,
   } as lobbyGameWatcherInfo);
 
-  const startButton =
-    resolveButton(msg, buttonId.startGame) || startGameButtonDefault();
-  const unhostButton =
-    resolveButton(msg, buttonId.unhostGame) || unhostGameButtonDefault();
-
   await editMessage(msg, {
     embeds: msgEmbeds,
     components: [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        startButton.setDisabled(game.slotsTaken === 0),
-        unhostButton
-      ),
+      buildLobbyButtonRow({
+        message: msg,
+        botid: game.botid,
+        rankingEnabled,
+        balanced,
+        slotsTaken: game.slotsTaken,
+      }),
     ],
   });
 
@@ -184,7 +178,7 @@ const getGameParams = async (
 
   const optionField =
     config && config.options.ranking
-      ? optionLobbyField.winrate
+      ? optionLobbyField.mmr
       : optionLobbyField.server;
 
   const parsedPlayers = playersLobbyToString(game.players, optionField);
@@ -199,5 +193,18 @@ const getGameParams = async (
     parsedPlayers.nicks + JSON.stringify(parsedPlayers.option) + game.mapname
   );
 
-  return { prevLobbyHash, newLobbyHash, parsedGame };
+  // Не балансировано = кнопка старта заблокирована. Переиспользуем ту же
+  // логику, что и у кнопки шафла: если план говорит "нечего балансировать"
+  // (соло-игра, недостаточно игроков, ranking выключен и т.п.) — это
+  // считается балансом (кнопка старта доступна).
+  const shufflePlan = await buildWinrateShufflePlan(guildID, game.botid);
+  const balanced = !shufflePlan.ok;
+
+  return {
+    prevLobbyHash,
+    newLobbyHash,
+    parsedGame,
+    rankingEnabled: Boolean(config && config.options.ranking),
+    balanced,
+  };
 };

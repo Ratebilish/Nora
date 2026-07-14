@@ -13,6 +13,13 @@ export const gamestatsCommand = new SlashCommandBuilder()
   )
   .addSubcommand((command) =>
     command.setName("stop").setDescription("stop collecting stats")
+  )
+  .addSubcommand((command) =>
+    command
+      .setName("test")
+      .setDescription(
+        "Force-send the summary for the latest recorded game (for testing, does not affect MMR)"
+      )
   );
 
 export default gamestatsCommand;

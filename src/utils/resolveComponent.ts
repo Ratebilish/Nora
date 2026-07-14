@@ -30,6 +30,25 @@ export const resolveButton = (
   return null;
 };
 
+export const resolveButtonByPrefix = (
+  message: Message,
+  customIdPrefix: string
+): ButtonBuilder | null => {
+  if (!message.components || !Array.isArray(message.components)) return null;
+  for (const row of message.components) {
+    if (!("components" in row)) continue;
+    for (const component of row.components) {
+      if (
+        component.type === ComponentType.Button &&
+        component.customId.startsWith(`${customIdPrefix}:`)
+      ) {
+        return ButtonBuilder.from(component);
+      }
+    }
+  }
+  return null;
+};
+
 export const resolveSelectMenu = (
   message: Message,
   customId: string

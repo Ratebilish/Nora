@@ -1,11 +1,11 @@
-import { getLobbyList, getPlayerWinrateForLobbyWatcher } from "../db/queries";
+import { getLobbyList, getPlayerMmrForLobbyWatcher } from "../db/queries";
 import { optionLobbyFieldToTitle } from "./globals";
 import { searchMapConfigByMapName } from "./mapConfig";
 
-export const EMPTY_LOBBY_USER_NAME = "open";
+export const EMPTY_LOBBY_USER_NAME = "------";
 export const EMPTY_LOBBY_DEFAULT = "-";
-export const EMPTY_LOBBY_WINRATE = "unranked";
-export const USER_LOBBY_PREFIX = "> ";
+export const EMPTY_LOBBY_MMR = "unranked";
+export const USER_LOBBY_PREFIX = "";
 export const SPACE = "‎‏‏‎ ";
 
 export const parseMapName = (mapName: string) => {
@@ -18,7 +18,8 @@ export const getPlayersTableFromRawString = async (
   totalSlots: number,
   slotMap: Array<mapConfigSlotMap>,
   rankMap: boolean,
-  mapName: string
+  mapConfigName: string,
+  guildID: string
 ): Promise<Array<lobbyTable>> => {
   //  Clean up from tabs and fill with empty symbols
   const rawPlayersString = rawString.split("\t").map((player: string) => {
@@ -32,15 +33,15 @@ export const getPlayersTableFromRawString = async (
       const name = rawPlayersString.shift();
       const server = rawPlayersString.shift();
       const ping = rawPlayersString.shift();
-      const winrate =
+      const mmr =
         rankMap && name
-          ? await getPlayerWinrateForLobbyWatcher(name)
+          ? await getPlayerMmrForLobbyWatcher(guildID, mapConfigName, name)
           : EMPTY_LOBBY_DEFAULT;
       return {
         name: `${USER_LOBBY_PREFIX}${name || EMPTY_LOBBY_DEFAULT}`,
         server: server || EMPTY_LOBBY_DEFAULT,
         ping: ping || EMPTY_LOBBY_DEFAULT,
-        winrate: winrate || EMPTY_LOBBY_DEFAULT,
+        mmr: mmr || EMPTY_LOBBY_DEFAULT,
       };
     })
   );
@@ -58,7 +59,7 @@ export const getPlayersTableFromRawString = async (
       name: `\`${title[0].toUpperCase() + title.substr(1)}\``,
       server: SPACE,
       ping: SPACE,
-      winrate: SPACE,
+      mmr: SPACE,
     });
   });
 
@@ -78,12 +79,12 @@ export const getPlayersTableFromRawString = async (
     const name =
       player.name === EMPTY_LOBBY_DEFAULT ? EMPTY_LOBBY_USER_NAME : player.name;
 
-    const winrate =
-      player.winrate === EMPTY_LOBBY_DEFAULT
+    const mmr =
+      player.mmr === EMPTY_LOBBY_DEFAULT
         ? EMPTY_LOBBY_DEFAULT
-        : `${player.winrate}`;
+        : `${player.mmr}`;
 
-    return { ...player, ping, name, winrate };
+    return { ...player, ping, name, mmr };
   });
 
   return lobby;
@@ -153,7 +154,8 @@ export const getFullLobbyInfo = async (guildID: string, game: lobbyGame) => {
     config.slots,
     config.slotMap,
     config.options.ranking,
-    config.name
+    config.name,
+    guildID
   );
 
   return {

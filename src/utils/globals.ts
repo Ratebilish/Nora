@@ -30,10 +30,7 @@ export const msgEditTimeout = {
 
 export const ghostApiTimeout = 5000;
 
-export const guildIDs = {
-  ghostGuild: "408947483763277825",
-  debugGuild: "408947483763277825",
-};
+export const guildID = "408947483763277825";
 
 export const defaultMapConfigName = "fbt";
 
@@ -100,7 +97,7 @@ export const loseEmoji = "📉";
 
 export const optionLobbyFieldToTitle = {
   [optionLobbyField.server]: "server",
-  [optionLobbyField.winrate]: "W | T | S",
+  [optionLobbyField.mmr]: "MMR",
 };
 
 export const commandLogsMaxCount = 50;
@@ -111,6 +108,7 @@ export const buttonId = {
   showConfigSelector: "lobby-watcher_button_show-config-selector",
   startGame: "lobby-watcher_button_start-game",
   refreshWatcher: "lobby-watcher_button_refresh-watcher",
+  shuffleWinrate: "lobby-watcher_button_shuffle-winrate",
 };
 
 export const selectMenuId = {

@@ -187,7 +187,7 @@ export const getWinStats = async (nickname: string) => {
   } as playerWinStats;
 };
 
-export const getLeaderBordByDamage = async (threshold: number = 3) => {
+export const getLeaderBordByDamage = async (threshold: number = 20) => {
   const games = await getParsedGamesStats();
 
   if (!games || games.length === 0) return null;

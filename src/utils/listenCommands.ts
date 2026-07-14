@@ -1,7 +1,7 @@
 import { client } from "../bot";
 import { warning } from "../embeds/response";
 import { sendReply } from "./discordMessage";
-import { guildIDs, msgDeleteTimeout, ownerID, production } from "./globals";
+import { guildID, msgDeleteTimeout, ownerID } from "./globals";
 import { log } from "./log";
 import { logCommand } from "./logCmd";
 
@@ -11,12 +11,8 @@ export const listenCommands = () =>
   client.on("interactionCreate", async (interaction) => {
     log(`[cmd] interaction received, type=${interaction.type}, guild=${interaction.guildId}`);
 
-    if (production && interaction.guildId !== guildIDs.ghostGuild) {
-      log(`[cmd] rejected: production guild mismatch (expected ${guildIDs.ghostGuild})`);
-      return;
-    }
-    if (!production && interaction.guildId !== guildIDs.debugGuild) {
-      log(`[cmd] rejected: debug guild mismatch (expected ${guildIDs.debugGuild}, got ${interaction.guildId})`);
+    if (interaction.guildId !== guildID) {
+      log(`[cmd] rejected: guild mismatch (expected ${guildID}, got ${interaction.guildId})`);
       return;
     }
 
